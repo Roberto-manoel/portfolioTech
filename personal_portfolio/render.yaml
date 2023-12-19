@@ -4,9 +4,11 @@ services:
   env: docker
   build:
     dockerfile: Dockerfile
+  startCommand:
+    - gunicorn meu_projeto.wsgi
   envVars:
   - key: DJANGO_SETTINGS_MODULE
-    value: myapp.settings
+    value: meu_projeto.settings
   - key: SECRET_KEY
     value: mysecretkey
   - key: DEBUG
