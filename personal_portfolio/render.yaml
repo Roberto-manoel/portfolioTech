@@ -5,10 +5,10 @@ services:
   build:
     dockerfile: Dockerfile
   startCommand:
-    - gunicorn meu_projeto.wsgi
+    - gunicorn personal_portfolio.wsgi
   envVars:
   - key: DJANGO_SETTINGS_MODULE
-    value: meu_projeto.settings
+    value: personal_portfolio.settings
   - key: SECRET_KEY
     value: mysecretkey
   - key: DEBUG
