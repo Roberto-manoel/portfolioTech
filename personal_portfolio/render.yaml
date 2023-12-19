@@ -1,6 +1,6 @@
 services:
 - type: web
-  name: django-app
+  name: rb_tecnologia-app
   env: docker
   build:
     dockerfile: Dockerfile
