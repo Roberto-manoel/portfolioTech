@@ -1,0 +1,9 @@
+services:
+- type: web
+  name: my-django-app
+  env: docker
+  buildCommand: docker build -t my-django-app .
+  startCommand: gunicorn myapp.wsgi:application --bind 0.0.0.0:$PORT
+  envVars:
+  - key: DJANGO_SETTINGS_MODULE
+    value: myapp.settings
