@@ -1,9 +1,15 @@
 services:
 - type: web
-  name: my-django-app
+  name: django-app
   env: docker
-  buildCommand: docker build -t my-django-app .
-  startCommand: gunicorn myapp.wsgi:application --bind 0.0.0.0:$PORT
+  build:
+    dockerfile: Dockerfile
   envVars:
   - key: DJANGO_SETTINGS_MODULE
     value: myapp.settings
+  - key: SECRET_KEY
+    value: mysecretkey
+  - key: DEBUG
+    value: 'false'
+  - key: ALLOWED_HOSTS
+    value: .onrender.com
