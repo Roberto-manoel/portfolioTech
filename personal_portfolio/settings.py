@@ -1,17 +1,17 @@
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+
+load_dotenv()  # carrega as variáveis de ambiente do arquivo .env
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-eupw67en=ng*kh%nvfo0@j2nl4hf0q!oe&*jialj*!fq@s!uls'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
 ALLOWED_HOSTS = ['rb-tecnologia.onrender.com', 'localhost', '127.0.0.1']
 
@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',  # Django will use this to manage static files.
+    'storages',  # Add this line
 ]
 
 MIDDLEWARE = [
@@ -36,10 +37,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.gzip.GZipMiddleware',  # Add this line
 ]
 
 ROOT_URLCONF = 'personal_portfolio.urls'
-WSGI_APPLICATION = 'personal_portfolio.wsgi.application'
 
 TEMPLATES = [
     {
@@ -57,20 +58,20 @@ TEMPLATES = [
     },
 ]
 
-# Database
-# https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 WSGI_APPLICATION = 'personal_portfolio.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),   # Ou um endereço IP se o banco de dados não estiver local
+        'PORT': os.getenv('DB_PORT'),
     }
 }
 
 # Password validation
-# https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -86,29 +87,37 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
-# https://docs.djangoproject.com/en/5.0/topics/i18n/
-
 LANGUAGE_CODE = 'pt-Br'
 
 TIME_ZONE = 'America/Sao_Paulo'
-
 USE_I18N = True
-
 USE_TZ = True
 
+# Media files (Uploaded by users)
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.0/howto/static-files/
+AWS_STATIC_LOCATION = 'static'
+STATIC_URL = 'https://%s/%s/' % (AWS_S3_CUSTOM_DOMAIN, AWS_STATIC_LOCATION)
+STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+STATIC_ROOT = BASE_DIR / 'staticfiles'  # Django will collect static files here.
 
-STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'  # This is the new line
+AWS_S3_OBJECT_PARAMETERS = {
+    'CacheControl': 'max-age=86400',
+}
+AWS_MEDIA_LOCATION = 'media'  # Adicionado esta linha
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
+MEDIA_URL = 'https://%s/%s/' % (AWS_S3_CUSTOM_DOMAIN, AWS_MEDIA_LOCATION)  # Modificado esta linha
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-MEDIA_ROOT = BASE_DIR / "uploads/"
-MEDIA_URL = "/media/"
+# Caching
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': 'D:\\var\\tmp\\django_cache',
+    }
+}
